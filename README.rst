@@ -1,6 +1,6 @@
 awsh
 ====
 
-*A modern shell for working with data in AWS*
+*A modern data-driven shell for AWS*
 
 ::
