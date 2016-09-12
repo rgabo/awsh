@@ -1,0 +1,15 @@
+check:
+	###### FLAKE8 #####
+	flake8 awsh/*.py
+	##### DOC8 ######
+	doc8 awsh/*.py
+	# Proper docstring conventions according to pep257
+	pep257 --add-ignore=D100,D101,D102,D103,D104,D105,D204
+	###### PYLINT (errors only) ######
+	pylint --rcfile .pylintrc -E awsh
+
+pylint:
+	###### PYLINT ######
+	pylint --rcfile .pylintrc awsh
+coverage:
+	py.test --cov awsh --cov-report term-missing tests/
