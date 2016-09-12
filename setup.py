@@ -53,4 +53,10 @@ setup(
     packages=find_packages(exclude=['contrib', 'docs', 'tests']),
 
     install_requires=[],
+
+    entry_points={
+        'console_scripts': [
+            'awsh=awsh:main',
+        ],
+    },
 )
