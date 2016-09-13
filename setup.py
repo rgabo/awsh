@@ -46,13 +46,16 @@ setup(
     ],
 
     # What does your project relate to?
-    keywords='aws pyspark',
+    keywords='aws emr pyspark spark',
 
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
     packages=find_packages(exclude=['contrib', 'docs', 'tests']),
 
-    install_requires=[],
+    install_requires=[
+        'prompt_toolkit>=1.0.0,<2.0.0',
+        'pygments',
+    ],
 
     entry_points={
         'console_scripts': [
