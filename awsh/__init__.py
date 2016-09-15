@@ -2,6 +2,10 @@ from __future__ import unicode_literals, print_function
 
 import atexit
 
+import sys
+import traceback
+
+from code import compile_command
 from prompt_toolkit import prompt
 from pyspark.sql import SparkSession
 
@@ -26,11 +30,14 @@ Welcome to                     __
 
     while True:
         try:
-            text = prompt('>>> ')
-            code = compile(text, 'awsh', 'single')
+            source = prompt('>>> ')
+            code = compile_command(source)
             exec(code)
         except (KeyboardInterrupt, EOFError):
             break
+        except Exception:
+            traceback.print_exc(file=sys.stdout)
+            continue
 
 if __name__ == '__main__':
     main()
