@@ -7,6 +7,7 @@ import traceback
 
 from code import compile_command
 from prompt_toolkit import prompt
+from prompt_toolkit.history import InMemoryHistory
 from pyspark.sql import SparkSession
 
 
@@ -31,9 +32,11 @@ Welcome to                     __
         \__,_/ |__/|__/____/_/ /_/
 """)
 
+    history = InMemoryHistory()
+
     while True:
         try:
-            source = prompt('>>> ')
+            source = prompt('>>> ', history=history)
             code = compile_command(source)
             exec(code)
         except (KeyboardInterrupt, EOFError):
