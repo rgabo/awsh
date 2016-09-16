@@ -11,7 +11,10 @@ from pyspark.sql import SparkSession
 
 
 def getOrCreateSpark():
-    return SparkSession.builder.getOrCreate()
+    return SparkSession.builder \
+                       .appName("awsh") \
+                       .enableHiveSupport() \
+                       .getOrCreate()
 
 
 def main():
