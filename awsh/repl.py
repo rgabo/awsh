@@ -7,6 +7,8 @@ from subprocess import call
 
 import atexit
 import sys
+
+from awsh.commands import PwdCommand
 from prompt_toolkit import prompt
 from prompt_toolkit.history import InMemoryHistory
 from pyspark.sql import SparkSession
@@ -42,7 +44,7 @@ class Session(object):
         if text[0] == '!':
             self.exec_shell(text[1:])
         elif text == 'pwd':
-            print(self.path)
+            PwdCommand(self.path).perform()
         else:
             self.exec_code(text)
 
