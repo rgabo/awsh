@@ -59,7 +59,7 @@ setup(
 
     entry_points={
         'console_scripts': [
-            'awsh=awsh:main',
+            'awsh=awsh.repl:run',
         ],
     },
 )
