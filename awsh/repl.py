@@ -1,14 +1,11 @@
 from __future__ import unicode_literals, print_function
 
-import os
-import traceback
-from codeop import compile_command
-from subprocess import call
-
 import atexit
+import os
 import sys
+import traceback
 
-from awsh.commands import PwdCommand
+from awsh.commands import PwdCommand, ShellCommand, CodeCommand
 from prompt_toolkit import prompt
 from prompt_toolkit.history import InMemoryHistory
 from pyspark.sql import SparkSession
@@ -40,20 +37,15 @@ class Session(object):
             self.handle_input(text)
 
     def handle_input(self, text):
-        # determine what to do with input text
-        if text[0] == '!':
-            self.exec_shell(text[1:])
-        elif text == 'pwd':
-            PwdCommand(self.path).perform()
+        # translate input into command
+        if text == 'pwd':
+            command = PwdCommand(self, text)
+        elif text.startswith('!'):
+            command = ShellCommand(self, text)
         else:
-            self.exec_code(text)
+            command = CodeCommand(self, text)
 
-    def exec_code(self, text):
-        exec(compile_command(text), self.globals)
-
-    @staticmethod
-    def exec_shell(text):
-        call(text, shell=True)
+        command.perform()
 
     @staticmethod
     def get_or_create_spark_context():

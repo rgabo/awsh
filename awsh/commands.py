@@ -1,24 +1,43 @@
 from __future__ import unicode_literals, print_function
 
-import os
 from abc import ABCMeta, abstractmethod
+from codeop import compile_command
+from subprocess import call
 
 
 class Command(metaclass=ABCMeta):
-    def __init__(self, name, path):
-        self.name = name
-        self.path = path
+    def __init__(self, session, text):
+        self.session = session
+        self.text = text
 
     @abstractmethod
     def perform(self): pass
 
     def __str__(self, *args, **kwargs):
-        return self.name
+        return self.text
+
+
+class CodeCommand(Command):
+    globals = {}
+
+    def __init__(self, session, text):
+        super().__init__(session, text)
+
+    def perform(self):
+        exec(compile_command(self.text), self.globals)
 
 
 class PwdCommand(Command):
-    def __init__(self, path):
-        super().__init__('pwd', path)
+    def __init__(self, session, text):
+        super().__init__(session, text)
 
     def perform(self):
-        print(self.path)
+        print(self.session.path)
+
+
+class ShellCommand(Command):
+    def __init__(self, session, text):
+        super().__init__(session, text)
+
+    def perform(self):
+        call(self.text[1:], shell=True)
