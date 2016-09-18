@@ -11,7 +11,7 @@ from prompt_toolkit.history import InMemoryHistory
 from pyspark.sql import SparkSession
 
 
-class ReplSession(object):
+class Session(object):
     def __init__(self):
         self.history = InMemoryHistory()
         self.spark = self.get_or_create_spark_context()
@@ -47,7 +47,7 @@ class ReplSession(object):
 
 
 def run():
-    session = ReplSession()
+    session = Session()
 
     print("""
 Welcome to                     __

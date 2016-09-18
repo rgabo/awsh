@@ -1,5 +1,5 @@
 from __future__ import unicode_literals, print_function
 
-from awsh.repl import ReplSession
+from awsh.repl import Session
 
-__all__ = [ReplSession]
+__all__ = [Session]
