@@ -9,6 +9,7 @@ from code import compile_command
 from prompt_toolkit import prompt
 from prompt_toolkit.history import InMemoryHistory
 from pyspark.sql import SparkSession
+from subprocess import call, run
 
 
 def getOrCreateSpark():
@@ -36,14 +37,31 @@ Welcome to                     __
 
     while True:
         try:
-            source = prompt('>>> ', history=history)
-            code = compile_command(source)
-            exec(code)
+            text = prompt('>>> ', history=history)
+            if text:
+                handle_input(text)
         except (KeyboardInterrupt, EOFError):
             break
         except Exception:
             traceback.print_exc(file=sys.stdout)
             continue
+
+
+def exec_code(text):
+    exec(compile_command(text))
+
+
+def exec_shell(text):
+    call(text, shell=True)
+
+
+def handle_input(text):
+    # determine what to do with input text
+    if text[0] == '!':
+        exec_shell(text[1:])
+    else:
+        exec_code(text)
+
 
 if __name__ == '__main__':
     main()
