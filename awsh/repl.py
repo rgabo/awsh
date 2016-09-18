@@ -28,8 +28,9 @@ class Session(object):
         self.globals = {}
         self.history = InMemoryHistory()
         self.path = Path(os.getcwd())
-        self.sc = None
-        self.spark = None
+        self.spark = self.get_or_create_spark_context()
+        self.sc = self.spark.sparkContext
+        atexit.register(lambda: self.sc.stop())
 
     def prompt(self):
         text = prompt('>>> ', history=self.history)
@@ -47,11 +48,6 @@ class Session(object):
 
     def exec_code(self, text):
         exec(compile_command(text), self.globals)
-
-    def initialize_spark(self):
-        self.spark = self.get_or_create_spark_context()
-        self.sc = self.spark.sparkContext
-        atexit.register(lambda: self.sc.stop())
 
     @staticmethod
     def exec_shell(text):
