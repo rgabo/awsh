@@ -1,5 +1,6 @@
 from __future__ import unicode_literals, print_function
 
+import os
 import traceback
 from codeop import compile_command
 from subprocess import call
@@ -11,12 +12,24 @@ from prompt_toolkit.history import InMemoryHistory
 from pyspark.sql import SparkSession
 
 
+class Path(object):
+    def __init__(self, cwd):
+        self.cwd = cwd
+
+    def __repr__(self, *args, **kwargs):
+        return "Path('{}')".format(self.cwd)
+
+    def __str__(self, *args, **kwargs):
+        return self.cwd
+
+
 class Session(object):
     def __init__(self):
+        self.globals = {}
         self.history = InMemoryHistory()
-        self.spark = self.get_or_create_spark_context()
-        self.sc = self.spark.sparkContext
-        atexit.register(lambda: self.sc.stop())
+        self.path = Path(os.getcwd())
+        self.sc = None
+        self.spark = None
 
     def prompt(self):
         text = prompt('>>> ', history=self.history)
@@ -27,12 +40,18 @@ class Session(object):
         # determine what to do with input text
         if text[0] == '!':
             self.exec_shell(text[1:])
+        elif text == 'pwd':
+            print(self.path)
         else:
             self.exec_code(text)
 
-    @staticmethod
-    def exec_code(text):
-        exec(compile_command(text))
+    def exec_code(self, text):
+        exec(compile_command(text), self.globals)
+
+    def initialize_spark(self):
+        self.spark = self.get_or_create_spark_context()
+        self.sc = self.spark.sparkContext
+        atexit.register(lambda: self.sc.stop())
 
     @staticmethod
     def exec_shell(text):
