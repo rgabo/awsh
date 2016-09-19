@@ -12,11 +12,23 @@ from prompt_toolkit.history import InMemoryHistory
 from pyspark.sql import SparkSession
 
 
+class Context(object):
+    def __init__(self):
+        self.path = Path(os.getcwd())
+
+    def iterdata(self):
+        return self.path.iterdir()
+
+    @property
+    def name(self):
+        return self.path.name
+
+
 class Session(object):
     def __init__(self):
+        self.context = Context()
         self.globals = {}
         self.history = InMemoryHistory()
-        self.path = Path(os.getcwd())
         self.spark = self.get_or_create_spark_context()
         self.sc = self.spark.sparkContext
         atexit.register(lambda: self.sc.stop())
@@ -29,21 +41,18 @@ class Session(object):
     def handle_input(self, input):
         # translate input into command
         if input == 'pwd':
-            command = PwdCommand(self, input)
+            command = PwdCommand(self.context, input)
         elif input == 'ls':
-            command = LsCommand(self, input)
+            command = LsCommand(self.context, input)
         elif input.startswith('!'):
-            command = ShellCommand(self, input)
+            command = ShellCommand(self.context, input)
         else:
-            command = CodeCommand(self, input)
+            command = CodeCommand(self.context, input)
 
         command.perform()
 
     def get_prompt(self):
-        return "{} $ ".format(self.path.name)
-
-    def iterdata(self):
-        return self.path.iterdir()
+        return "{} $ ".format(self.context.name)
 
     @staticmethod
     def get_or_create_spark_context():

@@ -6,8 +6,8 @@ from subprocess import call
 
 
 class Command(metaclass=ABCMeta):
-    def __init__(self, session, text):
-        self.session = session
+    def __init__(self, context, text):
+        self.context = context
         self.text = text
 
     @abstractmethod
@@ -26,18 +26,18 @@ class CodeCommand(Command):
 
 class LsCommand(Command):
     def perform(self):
-        for row in self.session.iterdata():
+        for row in self.context.iterdata():
             print(row.name)
 
 
 class PwdCommand(Command):
     def perform(self):
-        print(self.session.path)
+        print(self.context.path)
 
 
 class ShellCommand(Command):
-    def __init__(self, session, text):
-        super().__init__(session, text)
+    def __init__(self, context, text):
+        super().__init__(context, text)
         self.command = text[1:]
 
     def perform(self):
