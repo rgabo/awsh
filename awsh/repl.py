@@ -26,14 +26,14 @@ class Session(object):
         if text:
             self.handle_input(text)
 
-    def handle_input(self, text):
+    def handle_input(self, input):
         # translate input into command
-        if text == 'pwd':
-            command = PwdCommand(self, text)
-        elif text.startswith('!'):
-            command = ShellCommand(self, text)
+        if input == 'pwd':
+            command = PwdCommand(self, input)
+        elif input.startswith('!'):
+            command = ShellCommand(self, input)
         else:
-            command = CodeCommand(self, text)
+            command = CodeCommand(self, input)
 
         command.perform()
 
