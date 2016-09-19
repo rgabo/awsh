@@ -18,10 +18,8 @@ class Command(metaclass=ABCMeta):
 
 
 class CodeCommand(Command):
-    globals = {}
-
     def perform(self):
-        exec(compile_command(self.text), self.globals)
+        exec(compile_command(self.text), self.context.globals)
 
 
 class LsCommand(Command):
@@ -36,9 +34,5 @@ class PwdCommand(Command):
 
 
 class ShellCommand(Command):
-    def __init__(self, context, text):
-        super().__init__(context, text)
-        self.command = text[1:]
-
     def perform(self):
-        call(self.command, shell=True)
+        call(self.text, shell=True)

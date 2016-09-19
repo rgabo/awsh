@@ -15,6 +15,14 @@ from pyspark.sql import SparkSession
 class Context(object):
     def __init__(self):
         self.path = Path(os.getcwd())
+        self.spark = self.get_or_create_spark()
+        self.sc = self.spark.sparkContext
+        atexit.register(lambda: self.sc.stop())
+
+        self.globals = {
+            "spark": self.spark,
+            "sc": self.sc
+        }
 
     def iterdata(self):
         return self.path.iterdir()
@@ -23,15 +31,18 @@ class Context(object):
     def name(self):
         return self.path.name
 
+    @staticmethod
+    def get_or_create_spark():
+        return SparkSession.builder \
+            .appName("awsh") \
+            .enableHiveSupport() \
+        .getOrCreate()
+
 
 class Session(object):
     def __init__(self):
         self.context = Context()
-        self.globals = {}
         self.history = InMemoryHistory()
-        self.spark = self.get_or_create_spark_context()
-        self.sc = self.spark.sparkContext
-        atexit.register(lambda: self.sc.stop())
 
     def prompt(self):
         text = prompt(self.get_prompt(), history=self.history)
@@ -45,7 +56,7 @@ class Session(object):
         elif input == 'ls':
             command = LsCommand(self.context, input)
         elif input.startswith('!'):
-            command = ShellCommand(self.context, input)
+            command = ShellCommand(self.context, input[1:])
         else:
             command = CodeCommand(self.context, input)
 
@@ -53,13 +64,6 @@ class Session(object):
 
     def get_prompt(self):
         return "{} $ ".format(self.context.name)
-
-    @staticmethod
-    def get_or_create_spark_context():
-        return SparkSession.builder \
-            .appName("awsh") \
-            .enableHiveSupport() \
-            .getOrCreate()
 
 
 def run():
