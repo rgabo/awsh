@@ -38,6 +38,7 @@ class PwdCommand(Command):
 class ShellCommand(Command):
     def __init__(self, session, text):
         super().__init__(session, text)
+        self.command = text[1:]
 
     def perform(self):
-        call(self.text[1:], shell=True)
+        call(self.command, shell=True)
