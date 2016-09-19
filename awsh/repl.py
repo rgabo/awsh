@@ -36,7 +36,7 @@ class Context(object):
         return SparkSession.builder \
             .appName("awsh") \
             .enableHiveSupport() \
-        .getOrCreate()
+            .getOrCreate()
 
 
 class Session(object):
