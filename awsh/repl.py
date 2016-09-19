@@ -4,6 +4,7 @@ import atexit
 import os
 import sys
 import traceback
+from pathlib import PurePath
 
 from awsh.commands import PwdCommand, ShellCommand, CodeCommand
 from prompt_toolkit import prompt
@@ -11,28 +12,17 @@ from prompt_toolkit.history import InMemoryHistory
 from pyspark.sql import SparkSession
 
 
-class Path(object):
-    def __init__(self, cwd):
-        self.cwd = cwd
-
-    def __repr__(self, *args, **kwargs):
-        return "Path('{}')".format(self.cwd)
-
-    def __str__(self, *args, **kwargs):
-        return self.cwd
-
-
 class Session(object):
     def __init__(self):
         self.globals = {}
         self.history = InMemoryHistory()
-        self.path = Path(os.getcwd())
+        self.path = PurePath(os.getcwd())
         self.spark = self.get_or_create_spark_context()
         self.sc = self.spark.sparkContext
         atexit.register(lambda: self.sc.stop())
 
     def prompt(self):
-        text = prompt('>>> ', history=self.history)
+        text = prompt(self.get_prompt(), history=self.history)
         if text:
             self.handle_input(text)
 
@@ -46,6 +36,9 @@ class Session(object):
             command = CodeCommand(self, text)
 
         command.perform()
+
+    def get_prompt(self):
+        return "{} $ ".format(self.path.name)
 
     @staticmethod
     def get_or_create_spark_context():
