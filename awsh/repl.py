@@ -4,9 +4,9 @@ import atexit
 import os
 import sys
 import traceback
-from pathlib import PurePath
+from pathlib import Path
 
-from awsh.commands import PwdCommand, ShellCommand, CodeCommand
+from awsh.commands import PwdCommand, ShellCommand, CodeCommand, LsCommand
 from prompt_toolkit import prompt
 from prompt_toolkit.history import InMemoryHistory
 from pyspark.sql import SparkSession
@@ -16,7 +16,7 @@ class Session(object):
     def __init__(self):
         self.globals = {}
         self.history = InMemoryHistory()
-        self.path = PurePath(os.getcwd())
+        self.path = Path(os.getcwd())
         self.spark = self.get_or_create_spark_context()
         self.sc = self.spark.sparkContext
         atexit.register(lambda: self.sc.stop())
@@ -30,6 +30,8 @@ class Session(object):
         # translate input into command
         if input == 'pwd':
             command = PwdCommand(self, input)
+        elif input == 'ls':
+            command = LsCommand(self, input)
         elif input.startswith('!'):
             command = ShellCommand(self, input)
         else:
@@ -39,6 +41,9 @@ class Session(object):
 
     def get_prompt(self):
         return "{} $ ".format(self.path.name)
+
+    def iterdata(self):
+        return self.path.iterdir()
 
     @staticmethod
     def get_or_create_spark_context():

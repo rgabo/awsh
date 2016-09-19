@@ -20,17 +20,17 @@ class Command(metaclass=ABCMeta):
 class CodeCommand(Command):
     globals = {}
 
-    def __init__(self, session, text):
-        super().__init__(session, text)
-
     def perform(self):
         exec(compile_command(self.text), self.globals)
 
 
-class PwdCommand(Command):
-    def __init__(self, session, text):
-        super().__init__(session, text)
+class LsCommand(Command):
+    def perform(self):
+        for row in self.session.iterdata():
+            print(row.name)
 
+
+class PwdCommand(Command):
     def perform(self):
         print(self.session.path)
 
