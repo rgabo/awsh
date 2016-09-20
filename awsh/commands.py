@@ -43,3 +43,8 @@ class WcCommand(Command):
 class ShellCommand(Command):
     def perform(self):
         call(self.args)
+
+
+class SqlCommand(Command):
+    def perform(self):
+        self.context.sql(self.args).show()

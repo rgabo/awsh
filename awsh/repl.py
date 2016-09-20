@@ -8,7 +8,7 @@ from codeop import compile_command
 from datetime import datetime
 from pathlib import Path
 
-from awsh.commands import PwdCommand, ShellCommand, LsCommand, WcCommand
+from awsh.commands import PwdCommand, ShellCommand, LsCommand, WcCommand, SqlCommand
 
 from prompt_toolkit import prompt
 from prompt_toolkit.history import InMemoryHistory
@@ -28,6 +28,10 @@ class Context(object):
             "spark": self.spark,
             "sc": self.sc
         }
+
+    def sql(self, sql):
+        self.frame.registerTempTable("context")
+        return self.spark.sql(sql)
 
     @property
     def name(self):
@@ -82,6 +86,8 @@ class Session(object):
         # check for input modifiers
         if input.startswith('!'):
             return ShellCommand(self.context, self.parse_input(input[1:]))
+        if input.startswith('%'):
+            return SqlCommand(self.context, input[1:])
 
         # parse input
         command_name, *args = self.parse_input(input)
