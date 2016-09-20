@@ -12,6 +12,14 @@ class Command(metaclass=ABCMeta):
     @abstractmethod
     def perform(self): pass
 
+    @property
+    def sc(self):
+        return self.context.sc
+
+    @property
+    def spark(self):
+        return self.context.spark
+
 
 class LsCommand(Command):
     def perform(self):
@@ -22,6 +30,14 @@ class LsCommand(Command):
 class PwdCommand(Command):
     def perform(self):
         print(self.context.path)
+
+
+class WcCommand(Command):
+    def perform(self):
+        if self.args and self.args[0] == '-l':
+            print("{:>8} {}".format(self.sc.textFile(self.args[1]).count(), self.args[1]))
+        else:
+            ShellCommand(self.context, ['wc'] + self.args).perform()
 
 
 class ShellCommand(Command):

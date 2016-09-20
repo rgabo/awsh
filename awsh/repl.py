@@ -8,7 +8,7 @@ import traceback
 from codeop import compile_command
 from pathlib import Path
 
-from awsh.commands import PwdCommand, ShellCommand, LsCommand
+from awsh.commands import PwdCommand, ShellCommand, LsCommand, WcCommand
 from prompt_toolkit import prompt
 from prompt_toolkit.history import InMemoryHistory
 from pyspark.sql import SparkSession
@@ -70,6 +70,8 @@ class Session(object):
             return PwdCommand(self.context, args)
         elif command_name == 'ls':
             return LsCommand(self.context, args)
+        elif command_name == 'wc':
+            return WcCommand(self.context, args)
 
     def get_prompt(self):
         return "{} $ ".format(self.context.name)
