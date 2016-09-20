@@ -61,7 +61,7 @@ class Session(object):
     def get_command(self, input):
         # check for input modifiers
         if input.startswith('!'):
-            return ShellCommand(self.context, input[1:])
+            return ShellCommand(self.context, self.parse_input(input[1:]))
 
         # parse input
         command_name, *args = self.parse_input(input)
