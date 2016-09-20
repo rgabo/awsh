@@ -2,11 +2,13 @@ from __future__ import unicode_literals, print_function
 
 import atexit
 import os
+import shlex
 import sys
 import traceback
+from codeop import compile_command
 from pathlib import Path
 
-from awsh.commands import PwdCommand, ShellCommand, CodeCommand, LsCommand
+from awsh.commands import PwdCommand, ShellCommand, LsCommand
 from prompt_toolkit import prompt
 from prompt_toolkit.history import InMemoryHistory
 from pyspark.sql import SparkSession
@@ -47,20 +49,34 @@ class Session(object):
             self.handle_input(text)
 
     def handle_input(self, input):
-        # translate input into command
-        if input == 'pwd':
-            command = PwdCommand(self.context, input)
-        elif input == 'ls':
-            command = LsCommand(self.context, input)
-        elif input.startswith('!'):
-            command = ShellCommand(self.context, input[1:])
+        command = self.get_command(input)
+        if command:
+            command.perform()
         else:
-            command = CodeCommand(self.context, input)
+            self.exec_code(input)
 
-        command.perform()
+    def exec_code(self, input):
+        exec(compile_command(input), self.context.globals)
+
+    def get_command(self, input):
+        # check for input modifiers
+        if input.startswith('!'):
+            return ShellCommand(self.context, input[1:])
+
+        # parse input
+        command_name, *args = self.parse_input(input)
+
+        if command_name == 'pwd':
+            return PwdCommand(self.context, args)
+        elif command_name == 'ls':
+            return LsCommand(self.context, args)
 
     def get_prompt(self):
         return "{} $ ".format(self.context.name)
+
+    @staticmethod
+    def parse_input(input):
+        return shlex.split(input, posix=True)
 
 
 def run():
