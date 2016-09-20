@@ -1,27 +1,30 @@
 from __future__ import unicode_literals, print_function
 
 import atexit
-import os
 import shlex
 import sys
 import traceback
 from codeop import compile_command
+from datetime import datetime
 from pathlib import Path
 
 from awsh.commands import PwdCommand, ShellCommand, LsCommand, WcCommand
+
 from prompt_toolkit import prompt
 from prompt_toolkit.history import InMemoryHistory
+
+from pyspark import Row
 from pyspark.sql import SparkSession
 
 
 class Context(object):
     def __init__(self):
-        self.path = Path(os.getcwd())
         self.spark = self.get_or_create_spark()
         self.sc = self.spark.sparkContext
         atexit.register(lambda: self.sc.stop())
 
         self.globals = {
+            "context": self,
             "spark": self.spark,
             "sc": self.sc
         }
@@ -30,11 +33,28 @@ class Context(object):
     def name(self):
         return self.path.name
 
+    @property
+    def path(self):
+        return Path.cwd()
+
+    @property
+    def rows(self):
+        for child in self.path.iterdir():
+            stat = child.stat()
+            if child.is_dir():
+                type = 'directory'
+            else:
+                type = 'file'
+            yield Row(name=child.name, size=stat.st_size, type=type, modified_at=datetime.fromtimestamp(stat.st_mtime))
+
+    @property
+    def frame(self):
+        return self.spark.createDataFrame(self.rows)
+
     @staticmethod
     def get_or_create_spark():
         return SparkSession.builder \
             .appName("awsh") \
-            .enableHiveSupport() \
             .getOrCreate()
 
 
