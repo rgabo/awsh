@@ -24,9 +24,6 @@ class Context(object):
             "sc": self.sc
         }
 
-    def iterdata(self):
-        return self.path.iterdir()
-
     @property
     def name(self):
         return self.path.name

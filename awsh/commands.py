@@ -24,8 +24,8 @@ class CodeCommand(Command):
 
 class LsCommand(Command):
     def perform(self):
-        for row in self.context.iterdata():
-            print(row.name)
+        # always fall back to the shell command for now
+        ShellCommand(self.context, self.text).perform()
 
 
 class PwdCommand(Command):
