@@ -5,46 +5,46 @@ from subprocess import call
 
 
 class Command(metaclass=ABCMeta):
-    def __init__(self, context, args):
-        self.context = context
+    def __init__(self, args, context):
         self.args = args
+        self.context = context
 
     @abstractmethod
     def perform(self): pass
 
-    @property
-    def sc(self):
-        return self.context.sc
 
-    @property
-    def spark(self):
-        return self.context.spark
+class EchoCommand(Command):
+    name = 'echo'
+
+    def perform(self):
+        print(' '.join(self.args))
 
 
 class LsCommand(Command):
+    name = 'ls'
+
     def perform(self):
         # fall back to the shell command
-        ShellCommand(self.context, ['ls'] + self.args).perform()
+        call(['ls'] + self.args)
 
 
 class PwdCommand(Command):
+    name = 'pwd'
+
     def perform(self):
         print(self.context.path)
 
 
 class WcCommand(Command):
+    name = 'wc'
+
     def perform(self):
-        if self.args and self.args[0] == '-l':
-            print("{:>8} {}".format(self.sc.textFile(self.args[1]).count(), self.args[1]))
+        if len(self.args) > 1 and self.args[0] == '-l':
+            name = self.args[1]
+            print("{:>8} {}".format(self.get_line_count(name), name))
         else:
-            ShellCommand(self.context, ['wc'] + self.args).perform()
+            # fall back to the shell command
+            call(['wc'] + self.args)
 
-
-class ShellCommand(Command):
-    def perform(self):
-        call(self.args)
-
-
-class SqlCommand(Command):
-    def perform(self):
-        self.context.sql(self.args).show()
+    def get_line_count(self, name):
+        return self.context.sc.textFile(name).count()

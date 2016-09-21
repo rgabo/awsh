@@ -7,12 +7,11 @@ import traceback
 from codeop import compile_command
 from datetime import datetime
 from pathlib import Path
+from shutil import which
 
-from awsh.commands import PwdCommand, ShellCommand, LsCommand, WcCommand, SqlCommand
-
+from awsh.commands import *
 from prompt_toolkit import prompt
 from prompt_toolkit.history import InMemoryHistory
-
 from pyspark import Row
 from pyspark.sql import SparkSession
 
@@ -67,37 +66,53 @@ class Session(object):
         self.context = Context()
         self.history = InMemoryHistory()
 
+    def command(self, cmd, args):
+        for command in Command.__subclasses__():
+            if command.name == cmd:
+                return command(args, context=self.context)
+        return None
+
     def prompt(self):
         text = prompt(self.get_prompt(), history=self.history)
         if text:
             self.handle_input(text)
 
     def handle_input(self, input):
-        command = self.get_command(input)
+        # handle input modifiers
+        if input.startswith('>'):
+            return self.exec_code(input[1:])
+        if input.startswith('!'):
+            return self.exec_shell(input[1:])
+        if input.startswith('%'):
+            return self.exec_sql(input[1:])
+
+        # parse input as single cmd with args
+        cmd, *args = self.parse_input(input)
+        command = self.command(cmd, args)
+
+        # 1. execute builtin command
         if command:
-            command.perform()
+            self.exec_command(command)
+        # 2. execute shell command
+        elif which(cmd) is not None:
+            self.exec_shell(input)
+        # 3. execute as code
         else:
             self.exec_code(input)
 
     def exec_code(self, input):
         exec(compile_command(input), self.context.globals)
 
-    def get_command(self, input):
-        # check for input modifiers
-        if input.startswith('!'):
-            return ShellCommand(self.context, self.parse_input(input[1:]))
-        if input.startswith('%'):
-            return SqlCommand(self.context, input[1:])
+    @staticmethod
+    def exec_command(command):
+        command.perform()
 
-        # parse input
-        command_name, *args = self.parse_input(input)
+    @staticmethod
+    def exec_shell(input):
+        call(input, shell=True)
 
-        if command_name == 'pwd':
-            return PwdCommand(self.context, args)
-        elif command_name == 'ls':
-            return LsCommand(self.context, args)
-        elif command_name == 'wc':
-            return WcCommand(self.context, args)
+    def exec_sql(self, input):
+        self.context.sql(input).show()
 
     def get_prompt(self):
         return "{} $ ".format(self.context.name)
