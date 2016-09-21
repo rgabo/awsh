@@ -5,32 +5,39 @@ import shlex
 import sys
 import traceback
 from codeop import compile_command
-from datetime import datetime
 from pathlib import Path
 from shutil import which
 
 from awsh.commands import *
+from awsh.providers import PosixProvider
 from prompt_toolkit import prompt
 from prompt_toolkit.history import InMemoryHistory
-from pyspark import Row
 from pyspark.sql import SparkSession
 
 
 class Context(object):
     def __init__(self):
+        self.provider = PosixProvider(self)
         self.spark = self.get_or_create_spark()
         self.sc = self.spark.sparkContext
         atexit.register(lambda: self.sc.stop())
 
         self.globals = {
             "context": self,
+            "cwd": self.cwd,
             "spark": self.spark,
             "sc": self.sc
         }
 
     def sql(self, sql):
-        self.frame.registerTempTable("context")
+        # determine tables necessary to execute SQL
+        # FIXME: expose cwd only for now
+        self.cwd.registerTempTable("cwd")
         return self.spark.sql(sql)
+
+    @property
+    def cwd(self):
+        return self.provider.createDataFrame(self.path)
 
     @property
     def name(self):
@@ -39,20 +46,6 @@ class Context(object):
     @property
     def path(self):
         return Path.cwd()
-
-    @property
-    def rows(self):
-        for child in self.path.iterdir():
-            stat = child.stat()
-            if child.is_dir():
-                type = 'directory'
-            else:
-                type = 'file'
-            yield Row(name=child.name, size=stat.st_size, type=type, modified_at=datetime.fromtimestamp(stat.st_mtime))
-
-    @property
-    def frame(self):
-        return self.spark.createDataFrame(self.rows)
 
     @staticmethod
     def get_or_create_spark():
