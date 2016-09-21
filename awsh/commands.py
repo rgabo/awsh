@@ -1,5 +1,6 @@
 from __future__ import unicode_literals, print_function
 
+import os
 from abc import ABCMeta, abstractmethod
 from subprocess import call
 
@@ -11,6 +12,16 @@ class Command(metaclass=ABCMeta):
 
     @abstractmethod
     def perform(self): pass
+
+
+class CdCommand(Command):
+    name = 'cd'
+
+    def perform(self):
+        if self.args:
+            os.chdir(self.args[0])
+        else:
+            os.chdir(os.path.expanduser('~'))
 
 
 class EchoCommand(Command):
