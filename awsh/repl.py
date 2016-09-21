@@ -40,10 +40,6 @@ class Context(object):
         return self.provider.createDataFrame(self.path)
 
     @property
-    def name(self):
-        return self.path.name
-
-    @property
     def path(self):
         return Path.cwd()
 
@@ -108,7 +104,7 @@ class Session(object):
         self.context.sql(input).show()
 
     def get_prompt(self):
-        return "{} $ ".format(self.context.name)
+        return "{} $ ".format(self.context.path.name)
 
     @staticmethod
     def parse_input(input):
