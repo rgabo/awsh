@@ -32,4 +32,4 @@ RUN pip install -r requirements-test.txt
 COPY . /awsh
 RUN pip install .
 
-CMD awsh
+ENTRYPOINT awsh
