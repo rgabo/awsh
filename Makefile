@@ -1,3 +1,11 @@
+NAME=awsh
+
+build:
+	docker build -t $(NAME) .
+
+dev: build
+	docker run -it $(NAME)
+
 check:
 	###### FLAKE8 #####
 	flake8 awsh/*.py
@@ -8,8 +16,10 @@ check:
 	###### PYLINT (errors only) ######
 	pylint --rcfile .pylintrc -E awsh
 
+coverage:
+	py.test --cov awsh --cov-report term-missing tests/
+
 pylint:
 	###### PYLINT ######
 	pylint --rcfile .pylintrc awsh
-coverage:
-	py.test --cov awsh --cov-report term-missing tests/
+
