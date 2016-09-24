@@ -12,6 +12,14 @@ here = path.abspath(path.dirname(__file__))
 with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
+requirements = [
+    'prompt_toolkit>=1.0.0,<2.0.0',
+    'pygments',
+]
+
+with open('./requirements-test.txt') as test_reqs_txt:
+    test_requirements = [line for line in test_reqs_txt]
+
 setup(
     name='awsh',
 
@@ -52,10 +60,9 @@ setup(
     # simple. Or you can use find_packages().
     packages=find_packages(exclude=['contrib', 'docs', 'tests']),
 
-    install_requires=[
-        'prompt_toolkit>=1.0.0,<2.0.0',
-        'pygments',
-    ],
+    install_requires=requirements,
+    tests_require=test_requirements,
+    test_suite='tests',
 
     entry_points={
         'console_scripts': [
