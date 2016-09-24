@@ -130,3 +130,7 @@ Welcome to                     __
         except Exception:
             traceback.print_exc(file=sys.stdout)
             continue
+
+
+if __name__ == '__main__':
+    run()
