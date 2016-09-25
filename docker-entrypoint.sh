@@ -22,6 +22,7 @@ configure_s3cmd() {
 
     echo "access_key=${AWS_ACCESS_KEY_ID}" >> /root/.s3cfg
     echo "secret_key=${AWS_SECRET_ACCESS_KEY}" >> /root/.s3cfg
+    echo "gpg_passphrase=$(openssl rand -base64 32)" >> /root/.s3cfg
 }
 
 main() {
