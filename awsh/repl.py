@@ -10,6 +10,7 @@ from shutil import which
 
 from awsh.commands import *
 from awsh.providers import PosixProvider
+from awsh.util import lazy_property
 from prompt_toolkit import prompt
 from prompt_toolkit.history import InMemoryHistory
 from pyspark.sql import SparkSession
@@ -18,15 +19,10 @@ from pyspark.sql import SparkSession
 class Context(object):
     def __init__(self):
         self.provider = PosixProvider(self)
-        self.spark = self.get_or_create_spark()
-        self.sc = self.spark.sparkContext
         atexit.register(lambda: self.sc.stop())
 
         self.globals = {
             "context": self,
-            "cwd": self.cwd,
-            "spark": self.spark,
-            "sc": self.sc
         }
 
     def sql(self, sql):
@@ -43,8 +39,12 @@ class Context(object):
     def path(self):
         return Path.cwd()
 
-    @staticmethod
-    def get_or_create_spark():
+    @property
+    def sc(self):
+        return self.spark.sparkContext
+
+    @lazy_property
+    def spark(self):
         return SparkSession.builder \
             .appName("awsh") \
             .getOrCreate()
