@@ -26,3 +26,6 @@ pip-log.txt
 
 # Completions Index
 completions.idx
+
+# dotenv
+.env
