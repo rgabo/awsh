@@ -17,8 +17,8 @@ requirements = [
     'pygments',
 ]
 
-with open('./requirements-test.txt') as test_reqs_txt:
-    test_requirements = [line for line in test_reqs_txt]
+with open('./requirements-test.txt') as requirements_test_txt:
+    test_requirements = [line for line in requirements_test_txt]
 
 setup(
     name='awsh',
