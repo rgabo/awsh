@@ -19,8 +19,6 @@ from pyspark.sql import SparkSession
 class Context(object):
     def __init__(self):
         self.provider = PosixProvider(self)
-        atexit.register(lambda: self.sc.stop())
-
         self.globals = {
             "context": self,
         }
