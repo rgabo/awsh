@@ -17,9 +17,6 @@ requirements = [
     'pygments',
 ]
 
-with open('./requirements-test.txt') as requirements_test_txt:
-    test_requirements = [line for line in requirements_test_txt]
-
 setup(
     name='awsh',
 
@@ -59,8 +56,6 @@ setup(
     packages=find_packages(exclude=['contrib', 'docs', 'tests']),
 
     install_requires=requirements,
-    tests_require=test_requirements,
-    test_suite='tests',
 
     entry_points={
         'console_scripts': [
