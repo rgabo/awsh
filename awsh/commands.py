@@ -14,7 +14,7 @@ class Command(metaclass=ABCMeta):
     def perform(self): pass
 
 
-class CdCommand(Command):
+class ChangeDirectoryCommand(Command):
     name = 'cd'
 
     def perform(self):
@@ -31,7 +31,7 @@ class EchoCommand(Command):
         print(' '.join(self.args))
 
 
-class LsCommand(Command):
+class ListCommand(Command):
     name = 'ls'
 
     def perform(self):
@@ -39,14 +39,14 @@ class LsCommand(Command):
         call(['ls'] + self.args)
 
 
-class PwdCommand(Command):
+class PrintWorkingDirectoryCommand(Command):
     name = 'pwd'
 
     def perform(self):
         print(self.context.path)
 
 
-class WcCommand(Command):
+class WordCountCommand(Command):
     name = 'wc'
 
     def perform(self):
