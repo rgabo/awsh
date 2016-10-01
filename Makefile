@@ -4,7 +4,7 @@ build:
 	docker build -t $(NAME) .
 
 dev: build
-	docker run -it --env-file=.env $(NAME)
+	docker run -it --cap-add mknod --cap-add sys_admin --device=/dev/fuse --env-file=.env $(NAME)
 
 check:
 	###### FLAKE8 #####

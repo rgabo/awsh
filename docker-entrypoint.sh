@@ -25,8 +25,13 @@ configure_s3cmd() {
     echo "gpg_passphrase=$(openssl rand -base64 32)" >> /root/.s3cfg
 }
 
+start_syslog_ng() {
+    syslog-ng --no-caps
+}
+
 main() {
     configure_s3cmd
+    start_syslog_ng
     exec awsh "$@"
 }
 

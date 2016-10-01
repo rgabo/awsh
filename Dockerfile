@@ -26,18 +26,38 @@ RUN apt-get -y update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+# fuse & syslog-ng
+RUN apt-get -y update && \
+    apt-get install -y --no-install-recommends fuse syslog-ng && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+ADD etc/syslog-ng/syslog-ng.conf /etc/syslog-ng/syslog-ng.conf
+
+# goofys (S3)
+RUN cd /usr/bin && \
+        wget -q https://github.com/kahing/goofys/releases/download/v0.0.8/goofys && \
+        chmod +x goofys
+
+# workspaces
+RUN mkdir -p /buckets
+
+# local workspace
+RUN mkdir -p /local
+WORKDIR /local
+
+# awsh
 RUN mkdir -p /awsh
-WORKDIR /awsh
 
 COPY requirements.txt /awsh/requirements.txt
-RUN pip install -r requirements.txt
+RUN pip install -r /awsh/requirements.txt
 
 COPY requirements-test.txt /awsh/requirements-test.txt
-RUN pip install -r requirements-test.txt
+RUN pip install -r /awsh/requirements-test.txt
 
 COPY . /awsh
-RUN pip install .
+RUN pip install /awsh
 
+# entrypoint
 COPY docker-entrypoint.sh /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
