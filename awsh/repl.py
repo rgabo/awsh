@@ -1,6 +1,5 @@
 from __future__ import unicode_literals, print_function
 
-import atexit
 import shlex
 import sys
 import traceback
@@ -49,6 +48,8 @@ class Context(object):
 
 
 class Session(object):
+    keyword_commands = ["import"]
+
     def __init__(self):
         self.context = Context()
         self.history = InMemoryHistory()
@@ -80,10 +81,13 @@ class Session(object):
         # 1. execute builtin command
         if command:
             self.exec_command(command)
-        # 2. execute shell command
+        # 2. execute Python keywords
+        elif cmd in self.keyword_commands:
+            self.exec_code(input)
+        # 3. execute shell command
         elif which(cmd) is not None:
             self.exec_shell(input)
-        # 3. execute as code
+        # 4. execute as code
         else:
             self.exec_code(input)
 
@@ -126,9 +130,15 @@ Welcome to                     __
         except (KeyboardInterrupt, EOFError):
             break
         except Exception:
-            traceback.print_exc(file=sys.stdout)
-            continue
+            handle_exception(sys.exc_info())
 
+
+def handle_exception(exc_tuple):
+    last_type, last_value, last_traceback = exc_tuple
+    print(traceback.format_exception_only(last_type, last_value)[-1].rstrip('\n'))
+    sys.last_type = last_type
+    sys.last_value = last_value
+    sys.last_traceback = last_traceback
 
 if __name__ == '__main__':
     run()
