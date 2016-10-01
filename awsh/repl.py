@@ -125,6 +125,7 @@ Welcome to                     __
 """)
 
     while True:
+        # noinspection PyBroadException
         try:
             session.prompt()
         except (KeyboardInterrupt, EOFError):
