@@ -96,7 +96,7 @@ class Session(object):
 
     @staticmethod
     def exec_command(command):
-        command.perform()
+        command.exec()
 
     @staticmethod
     def exec_shell(input):
