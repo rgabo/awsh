@@ -55,7 +55,7 @@ class Session(object):
         self.history = InMemoryHistory()
 
     def command(self, cmd, args):
-        for command in Command.__subclasses__():
+        for command in Command.commands:
             if command.name == cmd:
                 return command(args, context=self.context)
         return None

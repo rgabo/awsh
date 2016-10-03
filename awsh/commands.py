@@ -21,19 +21,28 @@ class ArgumentParser(argparse.ArgumentParser):
 
 
 class Command(metaclass=ABCMeta):
+    commands = []
+
     def __init__(self, args, context):
         self.args = args
         self.context = context
 
-    def add_arguments(self, parser):
-        # collect all arguments into args by default
-        parser.add_argument('args', nargs=argparse.REMAINDER)
+    def exec(self):
+        self.perform(self.args)
 
+    @abstractmethod
+    def perform(self, args): pass
+
+
+class ParsedCommand(Command):
     def exec(self):
         try:
             self.perform(self.parser.parse_args(self.args))
         except ArgumentParserError:
             pass
+
+    @abstractmethod
+    def add_arguments(self, parser): pass
 
     @lazy_property
     def parser(self):
@@ -41,14 +50,18 @@ class Command(metaclass=ABCMeta):
         self.add_arguments(parser)
         return parser
 
-    @abstractmethod
-    def perform(self, args): pass
+
+def command(name, description=None):
+    def decorate(cls):
+        cls.name = name
+        cls.description = description
+        Command.commands.append(cls)
+        print('Registered command: {}'.format(name))
+    return decorate
 
 
-class ChangeDirectoryCommand(Command):
-    description = 'Change the shell working directory'
-    name = 'cd'
-
+@command('cd', description='Change the shell working directory')
+class ChangeDirectoryCommand(ParsedCommand):
     def add_arguments(self, parser):
         parser.add_argument('dir', default=os.path.expanduser('~'), nargs='?')
 
@@ -56,43 +69,33 @@ class ChangeDirectoryCommand(Command):
         os.chdir(args.dir)
 
 
+@command('echo', description='Write arguments to the standard output')
 class EchoCommand(Command):
-    description = 'Write arguments to the standard output'
-    name = 'echo'
-
     def perform(self, args):
-        print(' '.join(args.args))
+        print(' '.join(self.args))
 
 
+@command('ls', description='List directory contents')
 class ListCommand(Command):
-    description = 'List directory contents'
-    name = 'ls'
-
     def perform(self, args):
         # fall back to the shell command
-        call(['ls'] + args.args)
+        call(['ls'] + self.args)
 
 
+@command(name='mount', description='Mount data volumes')
 class MountCommand(Command):
-    description = 'Mount data volumes'
-    name = 'mount'
-
     def perform(self, args):
         pass
 
 
+@command('pwd', description='Print working directory')
 class PrintWorkingDirectoryCommand(Command):
-    description = 'Print working directory'
-    name = 'pwd'
-
     def perform(self, args):
         print(self.context.path)
 
 
-class WordCountCommand(Command):
-    description = 'Count the number of words'
-    name = 'wc'
-
+@command('wc', description='Count the number of words')
+class WordCountCommand(ParsedCommand):
     def add_arguments(self, parser):
         parser.add_argument('file', nargs='+')
 
