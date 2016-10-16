@@ -8,7 +8,7 @@ from pathlib import Path
 from shutil import which
 
 from awsh.commands import *
-from awsh.providers import PosixProvider, S3Provider, Provider
+from awsh.providers import Provider, PosixProvider
 from awsh.util import lazy_property
 from prompt_toolkit import prompt
 from prompt_toolkit.history import InMemoryHistory
@@ -22,41 +22,29 @@ class Context(object):
         }
 
     def sql(self, sql):
-        # determine tables necessary to execute SQL
-        # FIXME: expose cwd only for now
-        self.cwd.registerTempTable("cwd")
+        self.provider(self.cwd).create_df(self.cwd).registerTempTable('cwd')
         return self.spark.sql(sql)
 
     @property
     def cwd(self):
-        return self.provider.create_data_frame(self.path)
-
-    @property
-    def path(self):
         return Path.cwd()
-
-    @property
-    def provider(self):
-        for provider in Provider.providers:
-            if provider.name == self.tld:
-                return provider(self)
-
-        return PosixProvider(self)
 
     @property
     def sc(self):
         return self.spark.sparkContext
-
-    @property
-    def tld(self):
-        if len(self.path.parts) > 1:
-            return self.path.parts[1]
 
     @lazy_property
     def spark(self):
         return SparkSession.builder \
             .appName("awsh") \
             .getOrCreate()
+
+    def provider(self, path):
+        for provider in Provider.providers:
+            if str(path).startswith(provider.prefix):
+                return provider(self)
+
+        return PosixProvider(self)
 
 
 class Session(object):
@@ -70,7 +58,6 @@ class Session(object):
         for command in Command.commands:
             if command.name == cmd:
                 return command(args, context=self.context)
-        return None
 
     def prompt(self):
         text = prompt(self.get_prompt(), history=self.history)
@@ -118,7 +105,7 @@ class Session(object):
         self.context.sql(input).show()
 
     def get_prompt(self):
-        return "{} $ ".format(self.context.path.name)
+        return "{} $ ".format(self.context.cwd.name)
 
     @staticmethod
     def parse_input(input):

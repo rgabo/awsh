@@ -91,7 +91,7 @@ class MountCommand(Command):
 @command('pwd', description='Print working directory')
 class PrintWorkingDirectoryCommand(Command):
     def perform(self, args):
-        print(self.context.path)
+        print(self.context.cwd)
 
 
 @command('wc', description='Count the number of words')
