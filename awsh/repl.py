@@ -8,7 +8,7 @@ from pathlib import Path
 from shutil import which
 
 from awsh.commands import *
-from awsh.providers import PosixProvider
+from awsh.providers import PosixProvider, S3Provider, Provider
 from awsh.util import lazy_property
 from prompt_toolkit import prompt
 from prompt_toolkit.history import InMemoryHistory
@@ -17,7 +17,6 @@ from pyspark.sql import SparkSession
 
 class Context(object):
     def __init__(self):
-        self.provider = PosixProvider(self)
         self.globals = {
             "context": self,
         }
@@ -30,15 +29,28 @@ class Context(object):
 
     @property
     def cwd(self):
-        return self.provider.createDataFrame(self.path)
+        return self.provider.create_data_frame(self.path)
 
     @property
     def path(self):
         return Path.cwd()
 
     @property
+    def provider(self):
+        for provider in Provider.providers:
+            if provider.name == self.tld:
+                return provider(self)
+
+        return PosixProvider(self)
+
+    @property
     def sc(self):
         return self.spark.sparkContext
+
+    @property
+    def tld(self):
+        if len(self.path.parts) > 1:
+            return self.path.parts[1]
 
     @lazy_property
     def spark(self):
