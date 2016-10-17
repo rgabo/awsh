@@ -32,7 +32,7 @@ def provider(name, prefix):
 
 class PosixProvider(Provider):
     def create_df(self, path):
-        return self.context.spark.create_df(self.get_rows(path))
+        return self.context.spark.createDataFrame(self.get_rows(path))
 
     @staticmethod
     def get_rows(path):
