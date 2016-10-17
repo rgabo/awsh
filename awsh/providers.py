@@ -2,7 +2,7 @@ from __future__ import unicode_literals, print_function
 
 from abc import ABCMeta, abstractmethod
 from datetime import datetime
-from pathlib import PurePath
+from pathlib import PurePath, PosixPath
 from subprocess import run
 
 from pyspark import Row
@@ -49,11 +49,9 @@ class PosixProvider(Provider):
 
 
 @provider('s3', prefix='/buckets')
-class S3Provider(Provider):
-    def create_df(self, path):
-        super(S3Provider, self).create_df(path)
-
+class S3Provider(PosixProvider):
     def mount(self, path):
+        path = PosixPath(path)
         if len(path.parts) < 3:
             raise ValueError('Cannot mount all buckets at once.')
 

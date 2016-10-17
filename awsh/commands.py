@@ -86,7 +86,7 @@ class ListCommand(Command):
 @command('mount', description='Mount data volumes')
 class MountCommand(ParsedCommand):
     def add_arguments(self, parser):
-        parser.add_argument('dir', type=PosixPath)
+        parser.add_argument('dir')
 
     def perform(self, args):
         self.context.provider(args.dir).mount(args.dir)
