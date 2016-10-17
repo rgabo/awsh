@@ -3,6 +3,7 @@ from __future__ import unicode_literals, print_function
 import argparse
 import os
 from abc import ABCMeta, abstractmethod
+from pathlib import PosixPath
 from subprocess import call
 
 import sys
@@ -82,10 +83,13 @@ class ListCommand(Command):
         call(['ls'] + self.args)
 
 
-@command(name='mount', description='Mount data volumes')
-class MountCommand(Command):
+@command('mount', description='Mount data volumes')
+class MountCommand(ParsedCommand):
+    def add_arguments(self, parser):
+        parser.add_argument('dir', type=PosixPath)
+
     def perform(self, args):
-        pass
+        self.context.provider(args.dir).mount(args.dir)
 
 
 @command('pwd', description='Print working directory')
