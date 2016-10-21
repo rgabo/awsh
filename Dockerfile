@@ -40,7 +40,7 @@ RUN cd /usr/bin && \
 
 # useful CLI tools
 RUN apt-get -y update && \
-    apt-get install -y --no-install-recommends tree && \
+    apt-get install -y --no-install-recommends htop nano tmux tree vim && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
