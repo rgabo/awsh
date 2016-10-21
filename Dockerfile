@@ -38,6 +38,12 @@ RUN cd /usr/bin && \
         wget -q https://github.com/kahing/goofys/releases/download/v0.0.8/goofys && \
         chmod +x goofys
 
+# useful CLI tools
+RUN apt-get -y update && \
+    apt-get install -y --no-install-recommends tree && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
 # workspaces
 RUN mkdir -p /buckets
 
