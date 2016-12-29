@@ -30,7 +30,7 @@ ADD etc/syslog-ng/syslog-ng.conf /etc/syslog-ng/syslog-ng.conf
 
 # goofys (S3)
 RUN cd /usr/bin && \
-        wget -q https://github.com/kahing/goofys/releases/download/v0.0.8/goofys && \
+        wget -q https://github.com/kahing/goofys/releases/download/v0.0.9/goofys && \
         chmod +x goofys
 
 # useful CLI tools
